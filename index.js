@@ -8,23 +8,24 @@ app.use(cors());
 app.get('/api/psa-population', async (req, res) => {
   const { player, cardNumber, brand, variety } = req.query;
 
-  if (!player || !cardNumber || !brand || !variety) {
-    return res.status(400).send('Missing required query parameters');
+  if (!player || !cardNumber || !brand) {
+    return res.status(400).send('Missing required parameters: player, cardNumber, and brand are required.');
   }
 
-  try {
-    // Compose the actual PSA website URL you want to scrape
-    // Example URL format (replace with the real one you're scraping):
-    const psaUrl = `https://www.psacard.com/pop/${encodeURIComponent(player)}/${encodeURIComponent(cardNumber)}/${encodeURIComponent(brand)}/${encodeURIComponent(variety)}`;
+  // Build the PSA URL to fetch population data (adjust URL if PSA uses different format)
+  const psaUrl = `https://www.psacard.com/pop/api/population?player=${encodeURIComponent(player)}&cardNumber=${encodeURIComponent(cardNumber)}&brand=${encodeURIComponent(brand)}&variety=${encodeURIComponent(variety || '')}`;
 
+  try {
     const response = await axios.get(psaUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'application/json',
+        'Referer': 'https://www.psacard.com/',
+        'Origin': 'https://www.psacard.com'
       },
     });
-
-    // Send back the raw HTML or parse and send JSON as needed
-    res.send(response.data);
+    res.json(response.data);
   } catch (error) {
     res.status(500).send(error.toString());
   }
